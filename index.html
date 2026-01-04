@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Library</title>
+    <title>Gabriella's Library</title>
     <style>
         * {
             margin: 0;
@@ -66,9 +66,11 @@
             font-size: 14px;
             font-weight: 400;
             color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
         }
 
-        /* Filters */
+        /* Filters - Single Row */
         .filters {
             background: var(--bg-card);
             border: 1px solid var(--border-card);
@@ -81,16 +83,17 @@
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .filter-row:last-child {
-            margin-bottom: 0;
+            align-items: flex-start;
         }
 
         .filter-group {
             flex: 1;
-            min-width: 200px;
+            min-width: 180px;
+        }
+
+        .filter-group-small {
+            flex: 0 0 auto;
+            min-width: 120px;
         }
 
         label {
@@ -118,6 +121,76 @@
         select:focus {
             outline: none;
             border-color: var(--text-accent);
+        }
+
+        /* Multi-select tags dropdown */
+        .tag-filter-container {
+            position: relative;
+        }
+
+        .tag-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            margin-top: 4px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .tag-dropdown.active {
+            display: block;
+        }
+
+        .tag-option {
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 120ms ease;
+        }
+
+        .tag-option:hover {
+            background: var(--tag-bg);
+        }
+
+        .tag-option input[type="checkbox"] {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        /* Active filter chips */
+        .active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .filter-chip {
+            background: var(--tag-bg);
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-chip button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            color: var(--text-secondary);
         }
 
         /* Stats */
@@ -157,7 +230,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid var(--border-card);
+            padding: 8px;
         }
 
         .book-cover {
@@ -176,6 +249,7 @@
             justify-content: center;
             font-size: 48px;
             color: var(--text-secondary);
+            border-radius: 8px;
         }
 
         .book-info {
@@ -197,16 +271,18 @@
             margin-bottom: 8px;
         }
 
-        .book-meta {
-            font-size: 13px;
+        .book-meta-line {
+            font-size: 11px;
             color: var(--text-secondary);
             margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
         }
 
-        .gr-rating {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
+        .meta-separator {
+            color: var(--text-secondary);
         }
 
         .book-tags-preview {
@@ -230,7 +306,7 @@
             background: rgba(61, 51, 44, 0.12);
         }
 
-        /* Modal */
+        /* Modal - Two Column Layout */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -254,56 +330,81 @@
             background: var(--bg-modal);
             border: 1px solid var(--border-card);
             border-radius: 18px;
-            max-width: 700px;
+            max-width: 900px;
             width: 100%;
             margin: 40px auto;
             position: relative;
         }
 
-        .modal-header {
-            padding: 24px 24px 20px 24px;
-            border-bottom: 1px solid var(--border-section);
+        .modal-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 32px;
+            padding: 32px;
+        }
+
+        .modal-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-cover {
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border-card);
+            margin-bottom: 16px;
+        }
+
+        .modal-right {
+            display: flex;
+            flex-direction: column;
         }
 
         .modal-title {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             color: var(--text-primary);
+            line-height: 1.2;
         }
 
         .modal-author {
-            font-size: 16px;
+            font-size: 18px;
             color: var(--text-accent);
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
-        .modal-meta {
-            font-size: 13px;
-            color: var(--text-secondary);
-            line-height: 1.6;
+        .modal-metadata {
+            margin-bottom: 24px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border-section);
         }
 
         .modal-meta-item {
-            margin-bottom: 4px;
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 12px;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
 
         .modal-meta-label {
             font-weight: 600;
+            color: var(--text-secondary);
         }
 
-        .modal-body {
-            padding: 24px;
+        .modal-meta-value {
+            color: var(--text-primary);
         }
 
         .modal-section {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .modal-section-title {
             font-size: 13px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
             color: var(--text-primary);
             text-transform: uppercase;
             letter-spacing: 0.05em;
@@ -355,14 +456,6 @@
             background: var(--tag-bg);
         }
 
-        .modal-cover {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 8px;
-            border: 1px solid var(--border-card);
-            margin-bottom: 16px;
-        }
-
         /* Loading */
         .loading {
             text-align: center;
@@ -379,6 +472,23 @@
         }
 
         /* Responsive */
+        @media (max-width: 768px) {
+            .modal-content {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .modal-cover {
+                max-width: 300px;
+                margin: 0 auto 16px;
+            }
+
+            .modal-meta-item {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+        }
+
         @media (max-width: 640px) {
             .container {
                 padding: 24px 16px;
@@ -396,17 +506,27 @@
             .modal {
                 margin: 20px auto;
             }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .filter-group,
+            .filter-group-small {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>My Library</h1>
-            <p class="subtitle">A personal collection</p>
+            <h1>Gabriella's Library</h1>
+            <p class="subtitle">A personal archive of books I've read, loved, and collected. Browse by genre, author, or rating.</p>
         </header>
 
         <div class="filters">
+            <div class="active-filters" id="activeFilters"></div>
             <div class="filter-row">
                 <div class="filter-group">
                     <label for="searchInput">Search</label>
@@ -418,25 +538,24 @@
                         <option value="">All authors</option>
                     </select>
                 </div>
-                <div class="filter-group">
-                    <label for="tagFilter">Tag</label>
-                    <select id="tagFilter">
-                        <option value="">All tags</option>
-                    </select>
+                <div class="filter-group tag-filter-container">
+                    <label for="tagFilterButton">Tags</label>
+                    <button id="tagFilterButton" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-card); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--bg-input); color: var(--text-primary); text-align: left; cursor: pointer;">
+                        Select tags...
+                    </button>
+                    <div class="tag-dropdown" id="tagDropdown"></div>
                 </div>
-            </div>
-            <div class="filter-row">
-                <div class="filter-group">
-                    <label for="sortBy">Sort by</label>
+                <div class="filter-group-small">
+                    <label for="sortBy">Sort</label>
                     <select id="sortBy">
-                        <option value="title-asc">Title (A-Z)</option>
-                        <option value="title-desc">Title (Z-A)</option>
-                        <option value="date-added-desc">Date Added (Newest)</option>
-                        <option value="date-added-asc">Date Added (Oldest)</option>
-                        <option value="pubdate-desc">Published (Newest)</option>
-                        <option value="pubdate-asc">Published (Oldest)</option>
-                        <option value="gr-rating-desc">GR Rating (High-Low)</option>
-                        <option value="gr-rating-asc">GR Rating (Low-High)</option>
+                        <option value="title-asc">A-Z</option>
+                        <option value="title-desc">Z-A</option>
+                        <option value="date-added-desc">Newest</option>
+                        <option value="date-added-asc">Oldest</option>
+                        <option value="pubdate-desc">Pub: New</option>
+                        <option value="pubdate-asc">Pub: Old</option>
+                        <option value="gr-rating-desc">★ High</option>
+                        <option value="gr-rating-asc">★ Low</option>
                     </select>
                 </div>
             </div>
@@ -453,20 +572,24 @@
     <div class="modal-overlay" id="modalOverlay">
         <div class="modal">
             <button class="modal-close" onclick="closeModal()">&times;</button>
-            <div class="modal-header">
-                <h2 class="modal-title" id="modalTitle"></h2>
-                <div class="modal-author" id="modalAuthor"></div>
-                <div class="modal-meta" id="modalMeta"></div>
-            </div>
-            <div class="modal-body">
-                <img id="modalCover" class="modal-cover" style="display: none;">
-                <div class="modal-section" id="descriptionSection" style="display: none;">
-                    <h3 class="modal-section-title">Description</h3>
-                    <div class="modal-description" id="modalDescription"></div>
+            <div class="modal-content">
+                <div class="modal-left">
+                    <img id="modalCover" class="modal-cover" style="display: none;">
+                    <div class="modal-section" id="tagsSection" style="display: none;">
+                        <h3 class="modal-section-title">Tags</h3>
+                        <div class="modal-tags" id="modalTags"></div>
+                    </div>
                 </div>
-                <div class="modal-section" id="tagsSection" style="display: none;">
-                    <h3 class="modal-section-title">Tags</h3>
-                    <div class="modal-tags" id="modalTags"></div>
+                <div class="modal-right">
+                    <h2 class="modal-title" id="modalTitle"></h2>
+                    <div class="modal-author" id="modalAuthor"></div>
+                    
+                    <div class="modal-metadata" id="modalMetadata"></div>
+                    
+                    <div class="modal-section" id="descriptionSection" style="display: none;">
+                        <h3 class="modal-section-title">Description</h3>
+                        <div class="modal-description" id="modalDescription"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -475,6 +598,7 @@
     <script>
         let allBooks = [];
         let filteredBooks = [];
+        let selectedTags = new Set();
 
         // Load books from JSON
         async function loadBooks() {
@@ -514,9 +638,8 @@
                 book.tags.forEach(tag => tags.add(tag));
             });
 
+            // Author dropdown
             const authorSelect = document.getElementById('authorFilter');
-            const tagSelect = document.getElementById('tagFilter');
-
             Array.from(authors).sort().forEach(author => {
                 const option = document.createElement('option');
                 option.value = author;
@@ -524,25 +647,75 @@
                 authorSelect.appendChild(option);
             });
 
+            // Tag multi-select dropdown
+            const tagDropdown = document.getElementById('tagDropdown');
             Array.from(tags).sort().forEach(tag => {
-                const option = document.createElement('option');
-                option.value = tag;
-                option.textContent = tag;
-                tagSelect.appendChild(option);
+                const option = document.createElement('div');
+                option.className = 'tag-option';
+                option.innerHTML = `
+                    <input type="checkbox" id="tag-${tag}" value="${tag}">
+                    <label for="tag-${tag}" style="cursor: pointer; flex: 1;">${tag}</label>
+                `;
+                option.querySelector('input').addEventListener('change', (e) => {
+                    if (e.target.checked) {
+                        selectedTags.add(tag);
+                    } else {
+                        selectedTags.delete(tag);
+                    }
+                    updateActiveFilters();
+                    filterBooks();
+                });
+                tagDropdown.appendChild(option);
             });
 
             // Event listeners
             document.getElementById('searchInput').addEventListener('input', filterBooks);
             authorSelect.addEventListener('change', filterBooks);
-            tagSelect.addEventListener('change', filterBooks);
             document.getElementById('sortBy').addEventListener('change', sortAndDisplayBooks);
+
+            // Tag dropdown toggle
+            document.getElementById('tagFilterButton').addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.getElementById('tagDropdown').classList.toggle('active');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.tag-filter-container')) {
+                    document.getElementById('tagDropdown').classList.remove('active');
+                }
+            });
+        }
+
+        // Update active filter chips
+        function updateActiveFilters() {
+            const container = document.getElementById('activeFilters');
+            container.innerHTML = '';
+
+            selectedTags.forEach(tag => {
+                const chip = document.createElement('div');
+                chip.className = 'filter-chip';
+                chip.innerHTML = `
+                    ${tag}
+                    <button onclick="removeTag('${tag.replace(/'/g, "\\'")}')">&times;</button>
+                `;
+                container.appendChild(chip);
+            });
+        }
+
+        // Remove tag filter
+        function removeTag(tag) {
+            selectedTags.delete(tag);
+            const checkbox = document.getElementById(`tag-${tag}`);
+            if (checkbox) checkbox.checked = false;
+            updateActiveFilters();
+            filterBooks();
         }
 
         // Filter books
         function filterBooks() {
             const search = document.getElementById('searchInput').value.toLowerCase();
             const authorFilter = document.getElementById('authorFilter').value;
-            const tagFilter = document.getElementById('tagFilter').value;
 
             filteredBooks = allBooks.filter(book => {
                 const matchesSearch = !search || 
@@ -552,10 +725,10 @@
                 const matchesAuthor = !authorFilter || 
                     book.authors.includes(authorFilter);
                 
-                const matchesTag = !tagFilter || 
-                    book.tags.includes(tagFilter);
+                const matchesTags = selectedTags.size === 0 ||
+                    Array.from(selectedTags).every(tag => book.tags.includes(tag));
 
-                return matchesSearch && matchesAuthor && matchesTag;
+                return matchesSearch && matchesAuthor && matchesTags;
             });
 
             document.getElementById('stats').textContent = 
@@ -582,9 +755,9 @@
                     case 'pubdate-asc':
                         return new Date(a.pubdate || 0) - new Date(b.pubdate || 0);
                     case 'gr-rating-desc':
-                        return (b.gr_rating || 0) - (a.gr_rating || 0);
+                        return (parseFloat(b.gr_rating) || 0) - (parseFloat(a.gr_rating) || 0);
                     case 'gr-rating-asc':
-                        return (a.gr_rating || 0) - (b.gr_rating || 0);
+                        return (parseFloat(a.gr_rating) || 0) - (parseFloat(b.gr_rating) || 0);
                     default:
                         return 0;
                 }
@@ -613,16 +786,33 @@
                     ? `<img src="${book.cover}" alt="${book.title}" class="book-cover">`
                     : `<div class="book-cover-placeholder">📖</div>`;
 
-                // GR Rating display
-                let grRatingHTML = '';
+                // Build metadata line: ⭐ 4.2 • 320 pages • Sci-Fi
+                let metaParts = [];
                 if (book.gr_rating) {
-                    const rating = parseFloat(book.gr_rating).toFixed(2);
-                    grRatingHTML = `<div class="gr-rating">⭐ ${rating}</div>`;
+                    const rating = parseFloat(book.gr_rating).toFixed(1);
+                    metaParts.push(`⭐ ${rating}`);
                 }
+                if (book.pages) {
+                    metaParts.push(`${book.pages} pages`);
+                }
+                // Use genre column instead of first tag
+                if (book.genre) {
+                    metaParts.push(book.genre);
+                }
+                const metaLine = metaParts.join(' <span class="meta-separator">•</span> ');
 
-                const tagsHTML = book.tags.slice(0, 3).map(tag => 
-                    `<span class="tag" onclick="event.stopPropagation(); filterByTag('${tag.replace(/'/g, "\\'")}')">${tag}</span>`
+                // Show first 3 tags, then "+X more" if there are more
+                const maxTags = 3;
+                const visibleTags = book.tags.slice(0, maxTags);
+                const remainingCount = book.tags.length - maxTags;
+                
+                let tagsHTML = visibleTags.map(tag => 
+                    `<span class="tag" onclick="event.stopPropagation(); addTagFilter('${tag.replace(/'/g, "\\'")}')">${tag}</span>`
                 ).join('');
+                
+                if (remainingCount > 0) {
+                    tagsHTML += `<span class="tag" style="background: none; color: var(--text-secondary); padding: 6px 4px; cursor: default;">+${remainingCount} more</span>`;
+                }
 
                 card.innerHTML = `
                     <div class="book-cover-container">
@@ -631,7 +821,7 @@
                     <div class="book-info">
                         <div class="book-title">${book.title}</div>
                         <div class="book-author">${book.authors.join(', ') || 'Unknown'}</div>
-                        ${grRatingHTML ? `<div class="book-meta">${grRatingHTML}</div>` : ''}
+                        ${metaLine ? `<div class="book-meta-line">${metaLine}</div>` : ''}
                         <div class="book-tags-preview">${tagsHTML}</div>
                     </div>
                 `;
@@ -640,9 +830,12 @@
             });
         }
 
-        // Filter by tag (when clicked)
-        function filterByTag(tag) {
-            document.getElementById('tagFilter').value = tag;
+        // Add tag to filter
+        function addTagFilter(tag) {
+            selectedTags.add(tag);
+            const checkbox = document.getElementById(`tag-${tag}`);
+            if (checkbox) checkbox.checked = true;
+            updateActiveFilters();
             filterBooks();
         }
 
@@ -651,33 +844,67 @@
             document.getElementById('modalTitle').textContent = book.title;
             document.getElementById('modalAuthor').textContent = book.authors.join(', ') || 'Unknown Author';
             
-            // Meta info
-            let metaHTML = '';
+            // Build metadata section
+            let metadataHTML = '';
             
-            if (book.series) {
-                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Series:</span> ${book.series}`;
-                if (book.series_index) {
-                    metaHTML += ` #${book.series_index}`;
-                }
-                metaHTML += '</div>';
+            if (book.gr_rating) {
+                const rating = parseFloat(book.gr_rating).toFixed(2);
+                metadataHTML += `
+                    <div class="modal-meta-item">
+                        <div class="modal-meta-label">Goodreads</div>
+                        <div class="modal-meta-value">⭐ ${rating}</div>
+                    </div>
+                `;
+            }
+            
+            if (book.genre) {
+                metadataHTML += `
+                    <div class="modal-meta-item">
+                        <div class="modal-meta-label">Genre</div>
+                        <div class="modal-meta-value">${book.genre}</div>
+                    </div>
+                `;
             }
             
             if (book.pubdate) {
                 const pubYear = new Date(book.pubdate).getFullYear();
-                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Published:</span> ${pubYear}</div>`;
+                metadataHTML += `
+                    <div class="modal-meta-item">
+                        <div class="modal-meta-label">Published</div>
+                        <div class="modal-meta-value">${pubYear}</div>
+                    </div>
+                `;
             }
             
             if (book.timestamp) {
                 const addedDate = new Date(book.timestamp).toLocaleDateString();
-                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Added:</span> ${addedDate}</div>`;
+                metadataHTML += `
+                    <div class="modal-meta-item">
+                        <div class="modal-meta-label">Added</div>
+                        <div class="modal-meta-value">${addedDate}</div>
+                    </div>
+                `;
             }
             
-            if (book.gr_rating) {
-                const rating = parseFloat(book.gr_rating).toFixed(2);
-                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Goodreads Rating:</span> ⭐ ${rating}</div>`;
+            if (book.pages) {
+                metadataHTML += `
+                    <div class="modal-meta-item">
+                        <div class="modal-meta-label">Pages</div>
+                        <div class="modal-meta-value">${book.pages}</div>
+                    </div>
+                `;
             }
             
-            document.getElementById('modalMeta').innerHTML = metaHTML;
+            if (book.series) {
+                metadataHTML += `
+                    <div class="modal-meta-item">
+                        <div class="modal-meta-label">Series</div>
+                        <div class="modal-meta-value">${book.series}${book.series_index ? ` #${book.series_index}` : ''}</div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('modalMetadata').innerHTML = metadataHTML;
 
             // Cover
             const coverImg = document.getElementById('modalCover');
@@ -688,7 +915,7 @@
                 coverImg.style.display = 'none';
             }
 
-            // Description (preserve HTML formatting from Calibre)
+            // Description
             const descSection = document.getElementById('descriptionSection');
             if (book.description && book.description.trim()) {
                 document.getElementById('modalDescription').innerHTML = book.description;
@@ -697,12 +924,12 @@
                 descSection.style.display = 'none';
             }
 
-            // Tags (sorted alphabetically and clickable)
+            // Tags
             const tagsSection = document.getElementById('tagsSection');
             if (book.tags.length > 0) {
                 const sortedTags = [...book.tags].sort((a, b) => a.localeCompare(b));
                 document.getElementById('modalTags').innerHTML = sortedTags.map(tag =>
-                    `<span class="tag" onclick="closeModal(); filterByTag('${tag.replace(/'/g, "\\'")}')">${tag}</span>`
+                    `<span class="tag" onclick="closeModal(); addTagFilter('${tag.replace(/'/g, "\\'")}')">${tag}</span>`
                 ).join('');
                 tagsSection.style.display = 'block';
             } else {
