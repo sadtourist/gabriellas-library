@@ -96,14 +96,6 @@
             min-width: 120px;
         }
 
-        label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--text-primary);
-        }
-
         input[type="text"],
         select {
             width: 100%;
@@ -539,24 +531,20 @@
             <div class="active-filters" id="activeFilters"></div>
             <div class="filter-row">
                 <div class="filter-group">
-                    <label for="searchInput">Search</label>
                     <input type="text" id="searchInput" placeholder="Search for title, author, or tag...">
                 </div>
                 <div class="filter-group">
-                    <label for="authorFilter">Author</label>
                     <select id="authorFilter">
                         <option value="">All authors</option>
                     </select>
                 </div>
                 <div class="filter-group tag-filter-container">
-                    <label for="tagFilterButton">Tags</label>
                     <button id="tagFilterButton" style="width: 100%; padding: 8px 10px; border: 1px solid var(--border-card); border-radius: 8px; font-size: 14px; font-family: inherit; background: var(--bg-input); color: var(--text-primary); text-align: left; cursor: pointer;">
                         Select tags...
                     </button>
                     <div class="tag-dropdown" id="tagDropdown"></div>
                 </div>
                 <div class="filter-group-small">
-                    <label for="sortBy">Sort</label>
                     <select id="sortBy">
                         <option value="title-asc">A-Z</option>
                         <option value="title-desc">Z-A</option>
@@ -843,10 +831,10 @@
                         ${coverHTML}
                     </div>
                     <div class="book-info">
-                        <div class="book-tags-preview" style="margin-bottom: 8px;">${tagsHTML}</div>
+                        ${metaLine ? `<div class="book-meta-line" style="margin-bottom: 8px;">${metaLine}</div>` : ''}
                         <div class="book-title">${book.title}</div>
                         <div class="book-author">${book.authors.join(', ') || 'Unknown'}</div>
-                        ${metaLine ? `<div class="book-meta-line">${metaLine}</div>` : ''}
+                        <div class="book-tags-preview">${tagsHTML}</div>
                     </div>
                 `;
 
