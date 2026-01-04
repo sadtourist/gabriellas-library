@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Library</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors */
+            --bg-main: #f4efe7;
+            --bg-card: #fbf8f3;
+            --bg-modal: color-mix(in srgb, #f4efe7 78%, #ffffff 22%);
+            --bg-input: #ffffff;
+            
+            --text-primary: #3d332c;
+            --text-secondary: #7a6e65;
+            --text-accent: #6b5a4f;
+            
+            --border-card: rgba(61, 51, 44, 0.25);
+            --border-section: rgba(61, 51, 44, 0.18);
+            --border-dashed: rgba(61, 51, 44, 0.16);
+            
+            --btn-primary: #6a5d55;
+            --tag-bg: rgba(61, 51, 44, 0.08);
+            --checkbox-accent: #6b5a4f;
+        }
+
+        body {
+            font-family: ui-serif, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.5;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-section);
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        /* Filters */
+        .filters {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: border-color 120ms ease;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--text-accent);
+        }
+
+        /* Stats */
+        .stats {
+            text-align: center;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        /* Book Grid */
+        .book-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 40px;
+        }
+
+        .book-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 120ms ease;
+        }
+
+        .book-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .book-cover-container {
+            width: 100%;
+            aspect-ratio: 2/3;
+            overflow: hidden;
+            background: var(--bg-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 1px solid var(--border-card);
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid var(--border-card);
+        }
+
+        .book-cover-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: var(--text-secondary);
+        }
+
+        .book-info {
+            padding: 16px;
+        }
+
+        .book-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            line-height: 1.3;
+            color: var(--text-primary);
+        }
+
+        .book-author {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-accent);
+            margin-bottom: 10px;
+        }
+
+        .book-tags-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tag {
+            background: var(--tag-bg);
+            padding: 8px 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(20, 16, 12, 0.40);
+            z-index: 1000;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .modal {
+            background: var(--bg-modal);
+            border: 1px solid var(--border-card);
+            border-radius: 18px;
+            max-width: 700px;
+            width: 100%;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .modal-header {
+            padding: 24px 24px 20px 24px;
+            border-bottom: 1px solid var(--border-section);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .modal-author {
+            font-size: 16px;
+            color: var(--text-accent);
+            margin-bottom: 12px;
+        }
+
+        .modal-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .modal-description {
+            font-size: 15px;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .modal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 120ms ease;
+        }
+
+        .modal-close:hover {
+            background: var(--tag-bg);
+        }
+
+        .modal-cover {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            border: 1px solid var(--border-card);
+            margin-bottom: 16px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 80px 20px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        /* Read more link */
+        .read-more {
+            color: var(--text-accent);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-bottom: 1px dashed var(--border-dashed);
+            transition: border-color 120ms ease;
+        }
+
+        .read-more:hover {
+            border-bottom-color: var(--text-accent);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .container {
+                padding: 24px 16px;
+            }
+
+            .book-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 12px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .modal {
+                margin: 20px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Library</h1>
+            <p class="subtitle">A personal collection</p>
+        </header>
+
+        <div class="filters">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="searchInput">Search</label>
+                    <input type="text" id="searchInput" placeholder="Title or author...">
+                </div>
+                <div class="filter-group">
+                    <label for="authorFilter">Author</label>
+                    <select id="authorFilter">
+                        <option value="">All authors</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="tagFilter">Tag</label>
+                    <select id="tagFilter">
+                        <option value="">All tags</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="book-grid" id="bookGrid">
+            <div class="loading">Loading library...</div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle"></h2>
+                <div class="modal-author" id="modalAuthor"></div>
+                <div class="modal-meta" id="modalMeta"></div>
+            </div>
+            <div class="modal-body">
+                <img id="modalCover" class="modal-cover" style="display: none;">
+                <div class="modal-section" id="descriptionSection" style="display: none;">
+                    <h3 class="modal-section-title">Description</h3>
+                    <div class="modal-description" id="modalDescription"></div>
+                </div>
+                <div class="modal-section" id="tagsSection" style="display: none;">
+                    <h3 class="modal-section-title">Tags</h3>
+                    <div class="modal-tags" id="modalTags"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allBooks = [];
+        let filteredBooks = [];
+
+        // Load books from JSON
+        async function loadBooks() {
+            try {
+                const response = await fetch('books.json');
+                if (!response.ok) {
+                    throw new Error('Could not load books.json');
+                }
+                allBooks = await response.json();
+                filteredBooks = [...allBooks];
+                
+                document.getElementById('stats').textContent = `${allBooks.length} books`;
+                populateFilters();
+                displayBooks(filteredBooks);
+            } catch (error) {
+                document.getElementById('bookGrid').innerHTML = 
+                    '<div class="no-results">Could not load library. Make sure books.json is in the same folder.</div>';
+                console.error('Error loading books:', error);
+            }
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const authors = new Set();
+            const tags = new Set();
+
+            allBooks.forEach(book => {
+                book.authors.forEach(author => authors.add(author));
+                book.tags.forEach(tag => tags.add(tag));
+            });
+
+            const authorSelect = document.getElementById('authorFilter');
+            const tagSelect = document.getElementById('tagFilter');
+
+            Array.from(authors).sort().forEach(author => {
+                const option = document.createElement('option');
+                option.value = author;
+                option.textContent = author;
+                authorSelect.appendChild(option);
+            });
+
+            Array.from(tags).sort().forEach(tag => {
+                const option = document.createElement('option');
+                option.value = tag;
+                option.textContent = tag;
+                tagSelect.appendChild(option);
+            });
+
+            // Event listeners
+            document.getElementById('searchInput').addEventListener('input', filterBooks);
+            authorSelect.addEventListener('change', filterBooks);
+            tagSelect.addEventListener('change', filterBooks);
+        }
+
+        // Filter books
+        function filterBooks() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const authorFilter = document.getElementById('authorFilter').value;
+            const tagFilter = document.getElementById('tagFilter').value;
+
+            filteredBooks = allBooks.filter(book => {
+                const matchesSearch = !search || 
+                    book.title.toLowerCase().includes(search) ||
+                    book.authors.some(a => a.toLowerCase().includes(search));
+                
+                const matchesAuthor = !authorFilter || 
+                    book.authors.includes(authorFilter);
+                
+                const matchesTag = !tagFilter || 
+                    book.tags.includes(tagFilter);
+
+                return matchesSearch && matchesAuthor && matchesTag;
+            });
+
+            document.getElementById('stats').textContent = 
+                `${filteredBooks.length} of ${allBooks.length} books`;
+            displayBooks(filteredBooks);
+        }
+
+        // Display books
+        function displayBooks(books) {
+            const grid = document.getElementById('bookGrid');
+            
+            if (books.length === 0) {
+                grid.innerHTML = '<div class="no-results">No books found</div>';
+                return;
+            }
+
+            grid.innerHTML = '';
+
+            books.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card';
+                card.onclick = () => openModal(book);
+
+                const coverHTML = book.cover 
+                    ? `<img src="${book.cover}" alt="${book.title}" class="book-cover">`
+                    : `<div class="book-cover-placeholder">📖</div>`;
+
+                const tagsHTML = book.tags.slice(0, 2).map(tag => 
+                    `<span class="tag">${tag}</span>`
+                ).join('');
+
+                card.innerHTML = `
+                    <div class="book-cover-container">
+                        ${coverHTML}
+                    </div>
+                    <div class="book-info">
+                        <div class="book-title">${book.title}</div>
+                        <div class="book-author">${book.authors.join(', ') || 'Unknown'}</div>
+                        <div class="book-tags-preview">${tagsHTML}</div>
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Open modal
+        function openModal(book) {
+            document.getElementById('modalTitle').textContent = book.title;
+            document.getElementById('modalAuthor').textContent = book.authors.join(', ') || 'Unknown Author';
+            
+            // Meta info
+            let meta = [];
+            if (book.series) {
+                meta.push(`${book.series} #${book.series_index}`);
+            }
+            if (book.tags.length > 0) {
+                meta.push(`${book.tags.length} tags`);
+            }
+            document.getElementById('modalMeta').textContent = meta.join(' • ');
+
+            // Cover
+            const coverImg = document.getElementById('modalCover');
+            if (book.cover) {
+                coverImg.src = book.cover;
+                coverImg.style.display = 'block';
+            } else {
+                coverImg.style.display = 'none';
+            }
+
+            // Description
+            const descSection = document.getElementById('descriptionSection');
+            if (book.description && book.description.trim()) {
+                // Strip HTML tags from description
+                const div = document.createElement('div');
+                div.innerHTML = book.description;
+                document.getElementById('modalDescription').textContent = div.textContent;
+                descSection.style.display = 'block';
+            } else {
+                descSection.style.display = 'none';
+            }
+
+            // Tags
+            const tagsSection = document.getElementById('tagsSection');
+            if (book.tags.length > 0) {
+                document.getElementById('modalTags').innerHTML = book.tags.map(tag =>
+                    `<span class="tag">${tag}</span>`
+                ).join('');
+                tagsSection.style.display = 'block';
+            } else {
+                tagsSection.style.display = 'none';
+            }
+
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Close on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modalOverlay')) {
+                closeModal();
+            }
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Load books on page load
+        loadBooks();
+    </script>
+</body>
+</html>
