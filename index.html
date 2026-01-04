@@ -41,7 +41,7 @@
         }
 
         .container {
-            max-width: 1280px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 40px 24px;
         }
@@ -81,6 +81,11 @@
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
         }
 
         .filter-group {
@@ -126,8 +131,8 @@
         /* Book Grid */
         .book-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 18px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
             margin-bottom: 40px;
         }
 
@@ -178,7 +183,7 @@
         }
 
         .book-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             margin-bottom: 6px;
             line-height: 1.3;
@@ -186,10 +191,22 @@
         }
 
         .book-author {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
             color: var(--text-accent);
+            margin-bottom: 8px;
+        }
+
+        .book-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
             margin-bottom: 10px;
+        }
+
+        .gr-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .book-tags-preview {
@@ -200,11 +217,17 @@
 
         .tag {
             background: var(--tag-bg);
-            padding: 8px 10px;
-            border-radius: 12px;
-            font-size: 13px;
+            padding: 6px 8px;
+            border-radius: 10px;
+            font-size: 11px;
             color: var(--text-secondary);
             white-space: nowrap;
+            cursor: pointer;
+            transition: background 120ms ease;
+        }
+
+        .tag:hover {
+            background: rgba(61, 51, 44, 0.12);
         }
 
         /* Modal */
@@ -258,6 +281,15 @@
         .modal-meta {
             font-size: 13px;
             color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        .modal-meta-item {
+            margin-bottom: 4px;
+        }
+
+        .modal-meta-label {
+            font-weight: 600;
         }
 
         .modal-body {
@@ -279,8 +311,20 @@
 
         .modal-description {
             font-size: 15px;
-            line-height: 1.5;
+            line-height: 1.6;
             color: var(--text-primary);
+        }
+
+        .modal-description p {
+            margin-bottom: 12px;
+        }
+
+        .modal-description strong {
+            font-weight: 600;
+        }
+
+        .modal-description em {
+            font-style: italic;
         }
 
         .modal-tags {
@@ -334,20 +378,6 @@
             color: var(--text-secondary);
         }
 
-        /* Read more link */
-        .read-more {
-            color: var(--text-accent);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            border-bottom: 1px dashed var(--border-dashed);
-            transition: border-color 120ms ease;
-        }
-
-        .read-more:hover {
-            border-bottom-color: var(--text-accent);
-        }
-
         /* Responsive */
         @media (max-width: 640px) {
             .container {
@@ -395,6 +425,21 @@
                     </select>
                 </div>
             </div>
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label for="sortBy">Sort by</label>
+                    <select id="sortBy">
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="date-added-desc">Date Added (Newest)</option>
+                        <option value="date-added-asc">Date Added (Oldest)</option>
+                        <option value="pubdate-desc">Published (Newest)</option>
+                        <option value="pubdate-asc">Published (Oldest)</option>
+                        <option value="gr-rating-desc">GR Rating (High-Low)</option>
+                        <option value="gr-rating-asc">GR Rating (Low-High)</option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         <div class="stats" id="stats"></div>
@@ -439,11 +484,19 @@
                     throw new Error('Could not load books.json');
                 }
                 allBooks = await response.json();
+                
+                // Sort tags alphabetically for each book
+                allBooks.forEach(book => {
+                    if (book.tags) {
+                        book.tags.sort((a, b) => a.localeCompare(b));
+                    }
+                });
+                
                 filteredBooks = [...allBooks];
                 
                 document.getElementById('stats').textContent = `${allBooks.length} books`;
                 populateFilters();
-                displayBooks(filteredBooks);
+                sortAndDisplayBooks();
             } catch (error) {
                 document.getElementById('bookGrid').innerHTML = 
                     '<div class="no-results">Could not load library. Make sure books.json is in the same folder.</div>';
@@ -482,6 +535,7 @@
             document.getElementById('searchInput').addEventListener('input', filterBooks);
             authorSelect.addEventListener('change', filterBooks);
             tagSelect.addEventListener('change', filterBooks);
+            document.getElementById('sortBy').addEventListener('change', sortAndDisplayBooks);
         }
 
         // Filter books
@@ -506,7 +560,37 @@
 
             document.getElementById('stats').textContent = 
                 `${filteredBooks.length} of ${allBooks.length} books`;
-            displayBooks(filteredBooks);
+            sortAndDisplayBooks();
+        }
+
+        // Sort and display books
+        function sortAndDisplayBooks() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            const sorted = [...filteredBooks].sort((a, b) => {
+                switch(sortBy) {
+                    case 'title-asc':
+                        return a.title.localeCompare(b.title);
+                    case 'title-desc':
+                        return b.title.localeCompare(a.title);
+                    case 'date-added-desc':
+                        return new Date(b.timestamp || 0) - new Date(a.timestamp || 0);
+                    case 'date-added-asc':
+                        return new Date(a.timestamp || 0) - new Date(b.timestamp || 0);
+                    case 'pubdate-desc':
+                        return new Date(b.pubdate || 0) - new Date(a.pubdate || 0);
+                    case 'pubdate-asc':
+                        return new Date(a.pubdate || 0) - new Date(b.pubdate || 0);
+                    case 'gr-rating-desc':
+                        return (b.gr_rating || 0) - (a.gr_rating || 0);
+                    case 'gr-rating-asc':
+                        return (a.gr_rating || 0) - (b.gr_rating || 0);
+                    default:
+                        return 0;
+                }
+            });
+            
+            displayBooks(sorted);
         }
 
         // Display books
@@ -529,8 +613,15 @@
                     ? `<img src="${book.cover}" alt="${book.title}" class="book-cover">`
                     : `<div class="book-cover-placeholder">📖</div>`;
 
-                const tagsHTML = book.tags.slice(0, 2).map(tag => 
-                    `<span class="tag">${tag}</span>`
+                // GR Rating display
+                let grRatingHTML = '';
+                if (book.gr_rating) {
+                    const rating = parseFloat(book.gr_rating).toFixed(2);
+                    grRatingHTML = `<div class="gr-rating">⭐ ${rating}</div>`;
+                }
+
+                const tagsHTML = book.tags.slice(0, 3).map(tag => 
+                    `<span class="tag" onclick="event.stopPropagation(); filterByTag('${tag.replace(/'/g, "\\'")}')">${tag}</span>`
                 ).join('');
 
                 card.innerHTML = `
@@ -540,6 +631,7 @@
                     <div class="book-info">
                         <div class="book-title">${book.title}</div>
                         <div class="book-author">${book.authors.join(', ') || 'Unknown'}</div>
+                        ${grRatingHTML ? `<div class="book-meta">${grRatingHTML}</div>` : ''}
                         <div class="book-tags-preview">${tagsHTML}</div>
                     </div>
                 `;
@@ -548,20 +640,44 @@
             });
         }
 
+        // Filter by tag (when clicked)
+        function filterByTag(tag) {
+            document.getElementById('tagFilter').value = tag;
+            filterBooks();
+        }
+
         // Open modal
         function openModal(book) {
             document.getElementById('modalTitle').textContent = book.title;
             document.getElementById('modalAuthor').textContent = book.authors.join(', ') || 'Unknown Author';
             
             // Meta info
-            let meta = [];
+            let metaHTML = '';
+            
             if (book.series) {
-                meta.push(`${book.series} #${book.series_index}`);
+                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Series:</span> ${book.series}`;
+                if (book.series_index) {
+                    metaHTML += ` #${book.series_index}`;
+                }
+                metaHTML += '</div>';
             }
-            if (book.tags.length > 0) {
-                meta.push(`${book.tags.length} tags`);
+            
+            if (book.pubdate) {
+                const pubYear = new Date(book.pubdate).getFullYear();
+                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Published:</span> ${pubYear}</div>`;
             }
-            document.getElementById('modalMeta').textContent = meta.join(' • ');
+            
+            if (book.timestamp) {
+                const addedDate = new Date(book.timestamp).toLocaleDateString();
+                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Added:</span> ${addedDate}</div>`;
+            }
+            
+            if (book.gr_rating) {
+                const rating = parseFloat(book.gr_rating).toFixed(2);
+                metaHTML += `<div class="modal-meta-item"><span class="modal-meta-label">Goodreads Rating:</span> ⭐ ${rating}</div>`;
+            }
+            
+            document.getElementById('modalMeta').innerHTML = metaHTML;
 
             // Cover
             const coverImg = document.getElementById('modalCover');
@@ -572,23 +688,21 @@
                 coverImg.style.display = 'none';
             }
 
-            // Description
+            // Description (preserve HTML formatting from Calibre)
             const descSection = document.getElementById('descriptionSection');
             if (book.description && book.description.trim()) {
-                // Strip HTML tags from description
-                const div = document.createElement('div');
-                div.innerHTML = book.description;
-                document.getElementById('modalDescription').textContent = div.textContent;
+                document.getElementById('modalDescription').innerHTML = book.description;
                 descSection.style.display = 'block';
             } else {
                 descSection.style.display = 'none';
             }
 
-            // Tags
+            // Tags (sorted alphabetically and clickable)
             const tagsSection = document.getElementById('tagsSection');
             if (book.tags.length > 0) {
-                document.getElementById('modalTags').innerHTML = book.tags.map(tag =>
-                    `<span class="tag">${tag}</span>`
+                const sortedTags = [...book.tags].sort((a, b) => a.localeCompare(b));
+                document.getElementById('modalTags').innerHTML = sortedTags.map(tag =>
+                    `<span class="tag" onclick="closeModal(); filterByTag('${tag.replace(/'/g, "\\'")}')">${tag}</span>`
                 ).join('');
                 tagsSection.style.display = 'block';
             } else {
